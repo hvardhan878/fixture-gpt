@@ -1,0 +1,92 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "fixturegpt"
+version = "0.1.0"
+authors = [
+    {name = "FixtureGPT Team", email = "contact@fixturegpt.com"},
+]
+description = "A developer tool for recording and replaying expensive AI/LLM outputs during development and testing"
+readme = "README.md"
+license = {file = "LICENSE"}
+requires-python = ">=3.8"
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Software Development :: Testing",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+keywords = ["ai", "llm", "testing", "fixtures", "mock", "openai", "anthropic", "development"]
+dependencies = [
+    "typer>=0.9.0",
+    "rich>=13.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "black>=22.0.0",
+    "isort>=5.0.0",
+    "mypy>=1.0.0",
+    "pre-commit>=2.0.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/fixturegpt/fixturegpt"
+Documentation = "https://docs.fixturegpt.com"
+Repository = "https://github.com/fixturegpt/fixturegpt.git"
+"Bug Tracker" = "https://github.com/fixturegpt/fixturegpt/issues"
+
+[project.scripts]
+fixturegpt = "fixturegpt.cli:app"
+
+[tool.hatch.build.targets.wheel]
+packages = ["fixturegpt"]
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "/fixturegpt",
+    "/README.md",
+    "/LICENSE",
+    "/CHANGELOG.md",
+]
+
+[tool.black]
+line-length = 88
+target-version = ['py38']
+include = '\.pyi?$'
+extend-exclude = '''
+/(
+  # directories
+  \.eggs
+  | \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | build
+  | dist
+)/
+'''
+
+[tool.isort]
+profile = "black"
+multi_line_output = 3
+line_length = 88
+
+[tool.mypy]
+python_version = "3.8"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true 
