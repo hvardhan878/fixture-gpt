@@ -1,5 +1,6 @@
 """Command-line interface for FixtureGPT."""
 
+import os
 import typer
 import json
 from typing import Optional
@@ -20,19 +21,43 @@ def stats():
     """Show statistics about saved fixtures."""
     stats_data = get_fixture_stats()
     
+    # Cloud sync configuration
+    api_key = os.getenv('FIXTUREGPT_API_KEY')
+    sync_mode = os.getenv('FIXTUREGPT_SYNC_MODE', 'local')
+    api_url = os.getenv('FIXTUREGPT_API_URL', 'https://app.fixturegpt.com')
+    
+    # Cloud sync status panel
+    if api_key:
+        cloud_status = f"""
+☁️  Cloud Sync: [green]ENABLED[/green]
+🔑 API Key: [dim]{api_key[:12]}...[/dim]
+🔄 Sync Mode: [cyan]{sync_mode}[/cyan]
+🌐 Dashboard: [link]{api_url}[/link]
+        """
+    else:
+        cloud_status = f"""
+☁️  Cloud Sync: [red]DISABLED[/red]
+💡 Enable with: export FIXTUREGPT_API_KEY='your-key'
+🌐 Get API key: [link]https://app.fixturegpt.com/dashboard/api-keys[/link]
+        """
+    
+    console.print(Panel(cloud_status.strip(), title="Cloud Sync Status", border_style="blue"))
+    
     if stats_data["count"] == 0:
-        console.print("📭 No fixtures found.", style="yellow")
+        console.print("📭 No local fixtures found.", style="yellow")
+        if api_key and sync_mode in ['cloud', 'both']:
+            console.print("💡 You may have fixtures in the cloud dashboard.", style="dim")
         return
     
     # Create summary panel
     summary = f"""
-📊 Total Fixtures: {stats_data['count']}
+📊 Local Fixtures: {stats_data['count']}
 💾 Total Size: {stats_data['total_size']:,} bytes ({stats_data['total_size'] / 1024:.1f} KB)
     """
-    console.print(Panel(summary.strip(), title="FixtureGPT Stats", border_style="blue"))
+    console.print(Panel(summary.strip(), title="Local Fixture Stats", border_style="green"))
     
     # Create table of fixtures
-    table = Table(title="Fixture Details")
+    table = Table(title="Local Fixture Details")
     table.add_column("Name", style="cyan")
     table.add_column("Filename", style="magenta")
     table.add_column("Size", justify="right", style="green")
@@ -62,6 +87,30 @@ def stats():
 ⚡ Based on average $0.002 per LLM call
         """
         console.print(Panel(savings_panel.strip(), title="Cost Savings", border_style="green"))
+
+
+@app.command()
+def config():
+    """Show current FixtureGPT configuration."""
+    mode = os.getenv('FIXTUREGPT_MODE', 'record')
+    api_key = os.getenv('FIXTUREGPT_API_KEY')
+    sync_mode = os.getenv('FIXTUREGPT_SYNC_MODE', 'local')
+    api_url = os.getenv('FIXTUREGPT_API_URL', 'https://app.fixturegpt.com')
+    
+    config_info = f"""
+🎯 Mode: [cyan]{mode}[/cyan] (record/replay)
+☁️  Sync Mode: [cyan]{sync_mode}[/cyan] (local/cloud/both)
+🔑 API Key: {'[green]SET[/green]' if api_key else '[red]NOT SET[/red]'}
+🌐 API URL: [link]{api_url}[/link]
+    """
+    
+    console.print(Panel(config_info.strip(), title="FixtureGPT Configuration", border_style="blue"))
+    
+    if not api_key:
+        console.print("\n💡 To enable cloud sync:")
+        console.print("1. Get API key: https://app.fixturegpt.com/dashboard/api-keys")
+        console.print("2. Set environment variable: export FIXTUREGPT_API_KEY='your-key'")
+        console.print("3. Set sync mode: export FIXTUREGPT_SYNC_MODE='both'")
 
 
 @app.command()
